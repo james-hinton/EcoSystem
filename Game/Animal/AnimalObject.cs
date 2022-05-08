@@ -12,6 +12,12 @@ public class AnimalObject : MonoBehaviour
     // Thirst between 0 and 1
     public float thirst;
 
+    // Added hunger per tick
+    public float hungerPerTick;
+
+    // Added thirst per tick
+    public float thirstPerTick;
+
     // Array of food preferences
     public string[] foodPreferences;
 
@@ -21,10 +27,8 @@ public class AnimalObject : MonoBehaviour
     // Life span in seconds
     public float lifeSpan;
 
-    
-
-
-    
+    // Reproduction rate
+    public float reproductionDelay; 
 
     // Create Animal Game Object with the prefab and collider
     public void Spawn(GameObject prefab, Vector3 position)
@@ -43,10 +47,10 @@ public class AnimalObject : MonoBehaviour
 
     void CostOfLiving() {
         // Increase hunger by 0.1
-        hunger += 0.1f;
+        hunger += hungerPerTick;
 
         // Increase thirst by 0.1
-        thirst += 0.15f;
+        thirst += thirstPerTick;
     }
 
     // Update is called once per frame
@@ -56,8 +60,8 @@ public class AnimalObject : MonoBehaviour
         // Life span
         lifeSpan += 1;
 
-        // If lifespan divisible by 100,000
-        if (lifeSpan % 100_000 == 0) {
+        // Lifespan check, 10,000 * reproductionDelay
+        if (lifeSpan % (10_000 * reproductionDelay)  == 0) {
             // Create new Animal Game Object
             SpawnAnimal spawnAnimal = new SpawnAnimal();
 
@@ -119,18 +123,29 @@ public class AnimalObject : MonoBehaviour
         }
     }
 
+    public static Vector3 RandomPointInBounds(Bounds bounds) {
+    return new Vector3(
+        Random.Range(bounds.min.x, bounds.max.x),
+        Random.Range(bounds.min.y, bounds.max.y),
+        Random.Range(bounds.min.z, bounds.max.z)
+    );
+}
+
     public void MoveWater( Move move) {
         // Create Find Water object
         FindWater findWater = new FindWater();
 
         // Find water
-        GameObject water = findWater.FindNearestWater(range, transform.position);
+        GameObject waterObject = findWater.FindNearestWater(range, transform.position);
 
         // Move towards water
-        if (water != null)
+        if (waterObject != null)
         {
+            // Pick a position anywhere in the water object
+            Vector3 waterLocation = RandomPointInBounds(waterObject.GetComponent<Collider>().bounds);
+
             // Set target position to water location
-            move.targetPosition = water.transform.position;
+            move.targetPosition = waterLocation;
 
             // Set isMoving to true
             move.isMoving = true;
@@ -143,26 +158,49 @@ public class AnimalObject : MonoBehaviour
         // If it collides with tag "Food"
     private void OnTriggerEnter(Collider other)
     {
-        // If the tag is "Food"
-        if (other.tag == "Food" || other.tag == "Apple")
+        // Check all child object of other
+        foreach (Transform child in other.transform)
         {
-            // Get the object we have collided with
-            GameObject collidedObject = other.gameObject;
+            // Tag
+            string tag = child.tag;
 
-            // Destroy the collided object
-            Destroy(collidedObject);
+            foreach (string food in foodPreferences)
+            {
+                // Log that were checking tag and food
+                Debug.Log(tag + " vs " + food);
 
-            // Increase the size of the thing
-            // transform.localScale += new Vector3(0.1f, 0.1f, 0.1f);
+                // If the tag is in the array
+                if (tag == food)
+                {
+                    
+                    // Get the object we have collided with
+                    GameObject collidedObject = other.gameObject;
 
-            // Reduce the hunger
-            hunger -= 0.2f;
+                    // Destroy the collided object
+                    // Check if original object is hungry
+                    if (hunger > 0.25f) {
+                        Destroy(collidedObject);
+                        hunger -= 0.2f;
+                    }
 
-            // Stop moving
-            Move move = GetComponent<Move>();
-            move.isMoving = false;
+                    // Increase the size of the thing
+                    // transform.localScale += new Vector3(0.1f, 0.1f, 0.1f);
+
+                    // Unless hunger is less than 0
+                    if (hunger < 0)
+                    {
+                        // Set hunger to 0
+                        hunger = 0;
+                    }
+
+                    // Stop moving
+                    Move move = GetComponent<Move>();
+                    move.isMoving = false;
+                }
+            }
 
         }
+        // Loop through foodPreferences and see if the tag is in the array
 
         if (other.tag == "Water")
         {
@@ -171,14 +209,26 @@ public class AnimalObject : MonoBehaviour
 
             // TODO: Reduce the width of the collided object
             // collidedObject.transform.localScale -= new Vector3(0.1f, 0.1f, 0.1f);
-
+            
             // Reduce the thirst but not below 0
             thirst -= 0.2f;
             if (thirst < 0) {
                 thirst = 0;
             }
+
         }
             
+    }
+
+    // On trigger stay
+    private void OnTriggerStay(Collider other)
+    {
+        // If the tag is "Water"
+        if (other.tag == "Water")
+        {
+            // Thirst is always 0
+            thirst = 0;
+        }
     }
 
 }

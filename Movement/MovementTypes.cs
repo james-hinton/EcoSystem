@@ -59,6 +59,11 @@ namespace MovementTypes
             // Get target position
             Vector3 targetPosition = gameObject.GetComponent<Move>().targetPosition;
 
+            // Dont let targetPosition be greater than the objects Y height
+            if (targetPosition.y > transform.position.y)
+            {
+                targetPosition.y = transform.position.y;
+            }
             // Move towards the target position
             transform.position = Vector3.MoveTowards(currentPosition, targetPosition, speed * Time.deltaTime);
 

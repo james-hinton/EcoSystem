@@ -10,14 +10,17 @@ public class FindFood : MonoBehaviour
         // Loop through foodPreferences and find nearest food
         foreach (string food in foodPreferences)
         {
-            
-
             // Create a list of all food objects
             GameObject[] foodObjects = GameObject.FindGameObjectsWithTag(food);
-
+            
             // If not empty
             if (foodObjects.Length > 0)
             {
+
+                // Looking for the nearest food
+                Debug.Log("Looking for the nearest food" + food);
+
+
                 // Pick a random food object
                 int foodObjectIndex = Random.Range(0, foodObjects.Length);
 

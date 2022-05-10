@@ -13,7 +13,7 @@ public class RegisterClicks : MonoBehaviour
     void OnMouseDown()
     {
         // objectToMove every object with tag "Animal"
-        GameObject[] objectsToMove = GameObject.FindGameObjectsWithTag("Animal");
+        GameObject[] objectsToMove = GameObject.FindGameObjectsWithTag("NPC");
 
         // Using rays TODO: wtf is this?
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -30,11 +30,14 @@ public class RegisterClicks : MonoBehaviour
             foreach (GameObject objectToMove in objectsToMove)
             {
 
+                // Get parent object
+                GameObject parent = objectToMove.transform.parent.gameObject;
+
                 // Set the target position to the mouse position
-                objectToMove.GetComponent<Move>().targetPosition = clickedPosition;
+                parent.GetComponent<Move>().targetPosition = clickedPosition;
                 
                 // Call the function in the Movement script and pass the gameObject
-                objectToMove.GetComponent<Move>().isMoving = true;
+                parent.GetComponent<Move>().isMoving = true;
             }
 
         }

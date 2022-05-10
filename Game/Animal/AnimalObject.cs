@@ -75,29 +75,32 @@ public class AnimalObject : MonoBehaviour
         
         Move move = GetComponent<Move>();
         // Only call if isMoving is false
-        if (move.isMoving) {
-            return;
-        }
+        if (move) {
 
-        // Which hunger or thirst is a higher value
-        float highestValue = Mathf.Max(hunger, thirst);
+            if (move.isMoving) {
+                return;
+            }            
+            
+            // Which hunger or thirst is a higher value
+            float highestValue = Mathf.Max(hunger, thirst);
 
-        // If highestValue is greater than 1
-        if (highestValue > 1) {
-            // Destroy
-            Destroy(gameObject);
-        }
-
-        // Checks whether the animal is more hungry or thirsty and whether theyre higher than 0.5f
-        if (hunger > thirst) {
-            // MoveFood
-            if (hunger > 0.1f) {
-                MoveFood(move);
+            // If highestValue is greater than 1
+            if (highestValue > 1) {
+                // Destroy
+                Destroy(gameObject);
             }
-        } else {
-            // MoveWater
-            if (thirst > 0.25f) {
-                MoveWater(move);
+
+            // Checks whether the animal is more hungry or thirsty and whether theyre higher than 0.5f
+            if (hunger > thirst) {
+                // MoveFood
+                if (hunger > 0.1f) {
+                    MoveFood(move);
+                }
+            } else {
+                // MoveWater
+                if (thirst > 0.25f) {
+                    MoveWater(move);
+                }
             }
         }
 
@@ -155,7 +158,7 @@ public class AnimalObject : MonoBehaviour
         }
     }
 
-        // If it collides with tag "Food"
+    // If it collides with tag "Food"
     private void OnTriggerEnter(Collider other)
     {
         // Check all child object of other
@@ -166,8 +169,6 @@ public class AnimalObject : MonoBehaviour
 
             foreach (string food in foodPreferences)
             {
-                // Log that were checking tag and food
-                Debug.Log(tag + " vs " + food);
 
                 // If the tag is in the array
                 if (tag == food)
@@ -195,7 +196,9 @@ public class AnimalObject : MonoBehaviour
 
                     // Stop moving
                     Move move = GetComponent<Move>();
-                    move.isMoving = false;
+                    if (move) {
+                        move.isMoving = false;
+                    }
                 }
             }
 
@@ -215,9 +218,7 @@ public class AnimalObject : MonoBehaviour
             if (thirst < 0) {
                 thirst = 0;
             }
-
         }
-            
     }
 
     // On trigger stay
@@ -229,6 +230,16 @@ public class AnimalObject : MonoBehaviour
             // Thirst is always 0
             thirst = 0;
         }
+    }
+
+    // Function that returns given stat
+    public float GetStat(string stat) {
+        if (stat == "hunger") {
+            return hunger;
+        } else if (stat == "thirst") {
+            return thirst;
+        }
+        return 0;
     }
 
 }

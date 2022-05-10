@@ -17,10 +17,6 @@ public class FindFood : MonoBehaviour
             if (foodObjects.Length > 0)
             {
 
-                // Looking for the nearest food
-                Debug.Log("Looking for the nearest food" + food);
-
-
                 // Pick a random food object
                 int foodObjectIndex = Random.Range(0, foodObjects.Length);
 
